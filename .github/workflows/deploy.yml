@@ -3,7 +3,7 @@ name: Deploy to Nominalia via FTP
 on:
   push:
     branches:
-      - main
+      - main   # Se deploya cada vez que subes a main
 
 jobs:
   ftp-deploy:
@@ -13,12 +13,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: FTP Deploy Action
+    - name: FTP Deploy to Nominalia
       uses: SamKirkland/FTP-Deploy-Action@v4.3.0
       with:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USER }}
         password: ${{ secrets.FTP_PASS }}
+
+        # Carpeta de tu proyecto en GitHub
         local-dir: .
-        server-dir: .
+
+        # Carpeta pública en Nominalia
+        server-dir: /www
+
+        # NO borrar todo para evitar problemas
         dangerous-clean-slate: false
