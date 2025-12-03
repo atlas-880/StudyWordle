@@ -21,7 +21,7 @@ jobs:
           password: ${{ secrets.FTP_PASS }}
 
           # Carpeta local
-          local-dir: .
+          local-dir: ./
 
           # Carpeta remota (¡importante el slash final!)
           server-dir: /www/
