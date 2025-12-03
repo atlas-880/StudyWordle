@@ -1,0 +1,29 @@
+name: Deploy to Nominalia via FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: FTP Deploy to Nominalia
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.0
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+
+          # Carpeta local
+          local-dir: ./
+
+          # Carpeta remota (¡importante el slash final!)
+          server-dir: /www/
+
+          dangerous-clean-slate: false
