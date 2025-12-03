@@ -24,7 +24,7 @@ jobs:
           local-dir: ./
 
           # Carpeta en el servidor (Nominalia usa /www/)
-          server-dir: /www
+          server-dir: /www/
 
           # No borrar archivos automáticamente
           dangerous-clean-slate: false
