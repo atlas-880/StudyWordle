@@ -20,11 +20,10 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
 
-          # Carpeta local (tu repositorio)
-          local-dir: ./
+          # Carpeta local
+          local-dir: .
 
-          # Carpeta en el servidor (Nominalia usa /www/)
+          # Carpeta remota (¡importante el slash final!)
           server-dir: /www/
 
-          # No borrar archivos automáticamente
           dangerous-clean-slate: false
