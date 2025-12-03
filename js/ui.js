@@ -306,7 +306,25 @@ export function generateEmojiGrid(guesses, results) {
     return grid;
 }
 
-export async function copyToClipboard(text) {
+export async function shareResult(text) {
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'StudyWordle Result',
+                text: text
+            });
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.error('Error sharing:', err);
+                fallbackCopyToClipboard(text);
+            }
+        }
+    } else {
+        fallbackCopyToClipboard(text);
+    }
+}
+
+async function fallbackCopyToClipboard(text) {
     try {
         await navigator.clipboard.writeText(text);
         showToast("¡Copiado al portapapeles!");

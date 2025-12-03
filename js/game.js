@@ -6,7 +6,7 @@ import * as UI from './ui.js';
 import * as Storage from './storage.js';
 import { getGameData, parseInputData } from './data.js';
 
-const MAX_ATTEMPTS = 6;
+export const MAX_ATTEMPTS = 6;
 
 export function initGame() {
     try {
@@ -44,44 +44,55 @@ export function initGame() {
 }
 
 export function startNewRound() {
-    const data = state.data.length > 0 ? state.data : getGameData();
+    try {
+        const data = state.data.length > 0 ? state.data : getGameData();
 
-    // Adaptive Selection
-    const wordWeights = data.map(item => {
-        const stats = state.stats.wordStats?.[item.word] || { success: 0, fail: 0 };
-        // Higher weight if more fails. Base weight 1.
-        // Formula: 1 + (fails * 3) - (success * 0.5). Min 1.
-        let weight = 1 + (stats.fail * 3) - (stats.success * 0.5);
-        return Math.max(1, weight);
-    });
+        // Adaptive Selection
+        const wordWeights = data.map(item => {
+            const stats = state.stats.wordStats?.[item.word] || { success: 0, fail: 0 };
+            let weight = 1 + (stats.fail * 3) - (stats.success * 0.5);
+            return Math.max(1, weight);
+        });
 
-    const totalWeight = wordWeights.reduce((a, b) => a + b, 0);
-    let random = Math.random() * totalWeight;
-    let selectedIndex = 0;
+        const totalWeight = wordWeights.reduce((a, b) => a + b, 0);
+        let random = Math.random() * totalWeight;
+        let selectedIndex = 0;
 
-    for (let i = 0; i < data.length; i++) {
-        random -= wordWeights[i];
-        if (random <= 0) {
-            selectedIndex = i;
-            break;
+        for (let i = 0; i < data.length; i++) {
+            random -= wordWeights[i];
+            if (random <= 0) {
+                selectedIndex = i;
+                break;
+            }
         }
+
+        // Avoid repeating the same word if possible
+        if (data.length > 1 && data[selectedIndex].word === state.currentWord) {
+            selectedIndex = (selectedIndex + 1) % data.length;
+        }
+
+        const item = data[selectedIndex];
+
+        setState({
+            currentWord: normalizeWord(item.word),
+            currentDef: item.def,
+            guesses: [],
+            currentGuess: "",
+            gameStatus: "playing",
+            hintsUsed: 0
+        });
+
+        UI.hideGameOver();
+        UI.updateDefinition(state.currentDef, item.image, item.audio);
+        UI.initBoard(state.currentWord.length, MAX_ATTEMPTS);
+        UI.initKeyboard(handleInput);
+
+        // Optional: Toast to confirm new round
+        // UI.showToast("¡Nuevo concepto cargado!"); 
+    } catch (error) {
+        console.error("Error starting new round:", error);
+        UI.showToast("Error al iniciar ronda. Intenta recargar.");
     }
-
-    const item = data[selectedIndex];
-
-    setState({
-        currentWord: normalizeWord(item.word),
-        currentDef: item.def,
-        guesses: [],
-        currentGuess: "",
-        gameStatus: "playing",
-        hintsUsed: 0
-    });
-
-    UI.hideGameOver();
-    UI.updateDefinition(state.currentDef, item.image, item.audio);
-    UI.initBoard(state.currentWord.length, MAX_ATTEMPTS);
-    UI.initKeyboard(handleInput);
 }
 
 export function useHint() {
@@ -175,7 +186,7 @@ function submitGuess() {
     }, guess.length * 200 + 500);
 }
 
-function checkGuess(guess, target) {
+export function checkGuess(guess, target) {
     const guessArr = guess.split('');
     const targetArr = target.split('');
     const results = new Array(guess.length).fill('absent');

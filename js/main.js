@@ -1,7 +1,7 @@
 /**
  * Main Entry Point
  */
-import { initGame, handleInput, startNewRound, saveSettings, useHint } from './game.js';
+import { initGame, handleInput, startNewRound, saveSettings, useHint, checkGuess, MAX_ATTEMPTS } from './game.js';
 import * as UI from './ui.js';
 import * as Storage from './storage.js';
 import { state, setState } from './state.js';
@@ -74,8 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Share Result
     document.getElementById('share-btn').addEventListener('click', () => {
-        const grid = UI.generateEmojiGrid(state.guesses, state.results);
-        const shareText = `StudyWordle 🧪 ${state.currentRow}/${state.maxAttempts}\n\n${grid}`;
-        UI.copyToClipboard(shareText);
+        const results = state.guesses.map(guess => checkGuess(guess, state.currentWord));
+        const grid = UI.generateEmojiGrid(state.guesses, results);
+        const shareText = `StudyWordle 🧪 ${state.guesses.length}/${MAX_ATTEMPTS}\n\n${grid}\nhttps://www.studywordle.fun/`;
+        UI.shareResult(shareText);
     });
 });
